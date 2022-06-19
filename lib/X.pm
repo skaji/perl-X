@@ -51,6 +51,12 @@ package HTTP::Tiny {
         }
         $JSON->decode($res->{content});
     }
+    sub graphql ($self, $url, $query, $variables = undef) {
+        $self->post_json($url, {
+            query => $query,
+            ($variables ? (variables => $variables) : ()),
+        });
+    }
 }
 
 package Monotonic::Clock {
