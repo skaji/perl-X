@@ -1,0 +1,24 @@
+{
+  "dynamic_config": 0,
+  "meta-spec": {
+    "version": 2
+  },
+  "name": "X",
+  "prereqs": {
+    "runtime": {
+      "requires": {
+        "perl": "5.36.0",
+        "IO::Socket::SSL": "0",
+        "JSON::XS": "0"
+      }
+    }
+  },
+  "provides": {
+    "X": {
+      "file": "lib/X.pm",
+      "version": "1"
+    }
+  },
+  "version": "1",
+  "x_static_install": 1
+}
