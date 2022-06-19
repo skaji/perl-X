@@ -9,7 +9,7 @@ use JSON::XS ();
 use Time::HiRes ();
 
 use Exporter 'import';
-our @EXPORT = qw($JSON $HTTP dumper printd warnd clock);
+our @EXPORT = qw($JSON $HTTP dumper printd printj warnd warnj clock);
 
 our $JSON = JSON::XS->new->utf8->canonical;
 our $HTTP = HTTP::Tiny->new;
@@ -32,8 +32,16 @@ sub printd (@argv) {
     print dumper @argv;
 }
 
+sub printj ($argv) {
+    print $JSON->encode($argv) . "\n";
+}
+
 sub warnd (@argv) {
     warn dumper @argv;
+}
+
+sub warnj ($argv) {
+    warn $JSON->encode($argv) . "\n";
 }
 
 package HTTP::Tiny {
