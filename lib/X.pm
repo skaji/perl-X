@@ -9,7 +9,7 @@ use JSON::XS ();
 use Time::HiRes ();
 
 use Exporter 'import';
-our @EXPORT = qw($JSON $HTTP dumper printd printj warnd warnj clock);
+our @EXPORT = qw($JSON $HTTP dumper printd printj warnd warnj mono_clock);
 
 our $JSON = JSON::XS->new->utf8->canonical;
 our $HTTP = HTTP::Tiny->new;
@@ -80,7 +80,7 @@ package Monotonic::Clock {
     }
 }
 
-sub clock :prototype() {
+sub mono_clock :prototype() {
     Monotonic::Clock->new;
 }
 
