@@ -44,6 +44,14 @@ sub warnj ($argv) {
     warn $JSON->encode($argv) . "\n";
 }
 
+package JSON::XS {
+    sub load_file ($, $file) {
+        open my $fh, "<", $file or die "$!: $file";
+        my $c = do { local $/; <$fh> };
+        $JSON->decode($c);
+    }
+}
+
 package HTTP::Tiny {
     sub post_json ($self, $url, $data) {
         my $content = $JSON->encode($data);
