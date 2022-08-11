@@ -12,7 +12,7 @@ use Exporter 'import';
 our @EXPORT = qw($JSON $HTTP dumper printd printj warnd warnj mono_clock);
 
 our $JSON = JSON::XS->new->utf8->canonical;
-our $HTTP = HTTP::Tiny->new;
+our $HTTP = HTTP::Tiny->new(verify_SSL => 1);
 
 sub dumper (@argv) {
     Data::Dumper
