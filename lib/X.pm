@@ -45,10 +45,15 @@ sub warnj ($argv) {
 }
 
 package JSON::XS {
-    sub load_file ($, $file) {
-        open my $fh, "<", $file or die "$!: $file";
+    sub load ($self, $argv) {
+        my $fh;
+        if (ref $argv) {
+            $fh = $argv;
+        } else {
+            open $fh, "<", $argv or die "$argv: $!";
+        }
         my $c = do { local $/; <$fh> };
-        $JSON->decode($c);
+        $self->decode($c);
     }
 }
 
