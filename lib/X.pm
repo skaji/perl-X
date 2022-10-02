@@ -88,21 +88,8 @@ package HTTP::Tiny {
     }
 }
 
-package Monotonic::Clock {
-    sub new ($class) {
-        my $t = Time::HiRes::clock_gettime(Time::HiRes::CLOCK_MONOTONIC());
-        bless \$t, $class;
-    }
-    sub elapsed ($self) {
-        Time::HiRes::clock_gettime(Time::HiRes::CLOCK_MONOTONIC()) - $$self;
-    }
-    sub sub ($self, $other) {
-        $$self - $$other;
-    }
-}
-
 sub mono_clock :prototype() {
-    Monotonic::Clock->new;
+    Time::HiRes::clock_gettime(Time::HiRes::CLOCK_MONOTONIC());
 }
 
 1;
