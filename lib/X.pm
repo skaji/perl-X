@@ -7,9 +7,17 @@ use HTTP::Tiny;
 use IO::Socket::SSL;
 use JSON::XS ();
 use Time::HiRes ();
+use String::CamelSnakeKebab
+    qw(lower_camel_case upper_camel_case lower_snake_case upper_snake_case constant_case);
 
 use Exporter 'import';
-our @EXPORT = qw($JSON $HTTP dumper printd printj warnd warnj mono_clock);
+
+our @EXPORT = qw(
+    $JSON $HTTP
+    dumper printd printj warnd warnj
+    mono_clock
+    lower_camel_case upper_camel_case lower_snake_case upper_snake_case constant_case
+);
 
 our $JSON = JSON::XS->new->utf8->canonical;
 our $HTTP = HTTP::Tiny->new(verify_SSL => 1);
