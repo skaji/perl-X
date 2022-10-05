@@ -7,8 +7,7 @@ use Data::Dumper ();
 use HTTP::Tiny;
 use IO::Socket::SSL;
 use Time::HiRes ();
-use String::CamelSnakeKebab
-    qw(lower_camel_case upper_camel_case lower_snake_case upper_snake_case constant_case);
+use String::CamelSnakeKebab qw(constant_case);
 
 use Exporter 'import';
 
@@ -16,8 +15,7 @@ our @EXPORT = qw(
     $JSON $JSON_INDENT $HTTP
     dumper printd printj warnd warnj
     mono_clock
-    lower_camel_case upper_camel_case lower_snake_case upper_snake_case constant_case
-    camel_case snake_case
+    camel_case snake_case constant_case
 );
 
 our $JSON = Cpanel::JSON::XS->new->utf8->canonical;
@@ -96,14 +94,14 @@ sub mono_clock :prototype() {
 
 sub camel_case ($str) {
     if ($str =~ /^[A-Z]/) {
-        return upper_camel_case $str;
+        return String::CamelSnakeKebab::upper_camel_case $str;
     }
-    return lower_camel_case $str;
+    return String::CamelSnakeKebab::lower_camel_case $str;
 }
 
 {
     no warnings 'once';
-    *snake_case = \&lower_snake_case;
+    *snake_case = \&String::CamelSnakeKebab::lower_snake_case;
 }
 
 1;
