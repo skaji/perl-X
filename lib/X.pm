@@ -2,10 +2,10 @@ package X;
 use v5.36;
 use experimental qw(builtin defer for_list try);
 
+use Cpanel::JSON::XS ();
 use Data::Dumper ();
 use HTTP::Tiny;
 use IO::Socket::SSL;
-use JSON::XS ();
 use Time::HiRes ();
 use String::CamelSnakeKebab
     qw(lower_camel_case upper_camel_case lower_snake_case upper_snake_case constant_case);
@@ -13,13 +13,15 @@ use String::CamelSnakeKebab
 use Exporter 'import';
 
 our @EXPORT = qw(
-    $JSON $HTTP
+    $JSON $JSON_INDENT $HTTP
     dumper printd printj warnd warnj
     mono_clock
     lower_camel_case upper_camel_case lower_snake_case upper_snake_case constant_case
+    camel_case snake_case
 );
 
-our $JSON = JSON::XS->new->utf8->canonical;
+our $JSON = Cpanel::JSON::XS->new->utf8->canonical;
+our $JSON_INDENT = Cpanel::JSON::XS->new->utf8->canonical->pretty->space_before(0)->indent_length(2);
 our $HTTP = HTTP::Tiny->new(verify_SSL => 1);
 
 sub dumper (@argv) {
@@ -90,6 +92,18 @@ package HTTP::Tiny {
 
 sub mono_clock :prototype() {
     Time::HiRes::clock_gettime(Time::HiRes::CLOCK_MONOTONIC());
+}
+
+sub camel_case ($str) {
+    if ($str =~ /^[A-Z]/) {
+        return upper_camel_case $str;
+    }
+    return lower_camel_case $str;
+}
+
+{
+    no warnings 'once';
+    *snake_case = \&lower_snake_case;
 }
 
 1;
