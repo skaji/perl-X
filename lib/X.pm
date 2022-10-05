@@ -52,7 +52,7 @@ sub warnj ($argv) {
     warn $JSON->encode($argv) . "\n";
 }
 
-package JSON::XS {
+package Cpanel::JSON::XS {
     sub load ($self, $argv) {
         my $fh;
         if (ref $argv) {
