@@ -52,40 +52,30 @@ sub warnj ($argv) {
     warn $JSON->encode($argv) . "\n";
 }
 
-package Cpanel::JSON::XS {
-    sub load ($self, $argv) {
-        my $fh;
-        if (ref $argv) {
-            $fh = $argv;
-        } else {
-            open $fh, "<", $argv or die "$argv: $!";
-        }
-        my $c = do { local $/; <$fh> };
-        $self->decode($c);
+sub Cpanel::JSON::XS::load ($self, $argv) {
+    my $fh;
+    if (ref $argv) {
+        $fh = $argv;
+    } else {
+        open $fh, "<", $argv or die "$argv: $!";
     }
+    my $c = do { local $/; <$fh> };
+    $self->decode($c);
 }
 
-package HTTP::Tiny {
-    sub post_json ($self, $url, $data) {
-        my $content = $JSON->encode($data);
-        my $res = $self->post($url, {
-            headers => {
-                'content-type' => 'application/json',
-                'content-length' => length $content,
-            },
-            content => $content,
-        });
-        if (!$res->{success}) {
-            die "$res->{status} $res->{reason}, $url\n";
-        }
-        $JSON->decode($res->{content});
+sub HTTP::Tiny::post_json ($self, $url, $data) {
+    my $content = $JSON->encode($data);
+    my $res = $self->post($url, {
+        headers => {
+            'content-type' => 'application/json',
+            'content-length' => length $content,
+        },
+        content => $content,
+    });
+    if (!$res->{success}) {
+        die "$res->{status} $res->{reason}, $url\n";
     }
-    sub graphql ($self, $url, $query, $variables = undef) {
-        $self->post_json($url, {
-            query => $query,
-            ($variables ? (variables => $variables) : ()),
-        });
-    }
+    $JSON->decode($res->{content});
 }
 
 sub mono_clock :prototype() {
