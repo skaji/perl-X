@@ -7,7 +7,7 @@ use Data::Dumper ();
 use HTTP::Tiny;
 use IO::Socket::SSL;
 use Time::HiRes ();
-use String::CamelSnakeKebab qw(constant_case);
+use String::CamelSnakeKebab ();
 
 use Exporter 'import';
 
@@ -17,7 +17,7 @@ our @EXPORT = qw(
     dumper
     printd printj printjp warnd warnj warnjp
     mono_clock
-    camel_case snake_case constant_case
+    camel_case snake_case const_case
 );
 
 our $HTTP = HTTP::Tiny->new(verify_SSL => 1);
@@ -115,6 +115,7 @@ sub camel_case ($str) {
 {
     no warnings 'once';
     *snake_case = \&String::CamelSnakeKebab::lower_snake_case;
+    *const_case = \&String::CamelSnakeKebab::constant_case;
 }
 
 1;
