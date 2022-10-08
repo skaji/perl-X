@@ -12,15 +12,41 @@ use String::CamelSnakeKebab qw(constant_case);
 use Exporter 'import';
 
 our @EXPORT = qw(
-    $JSON $JSON_INDENT $HTTP
-    dumper printd printj warnd warnj
+    $HTTP
+    encode_json encode_json_pretty decode_json load_json
+    dumper
+    printd printj printjp warnd warnj warnjp
     mono_clock
     camel_case snake_case constant_case
 );
 
-our $JSON = Cpanel::JSON::XS->new->utf8->canonical;
-our $JSON_INDENT = Cpanel::JSON::XS->new->utf8->canonical->pretty->space_before(0)->indent_length(2);
 our $HTTP = HTTP::Tiny->new(verify_SSL => 1);
+
+my $JSON = Cpanel::JSON::XS->new->utf8->canonical;
+my $JSON_PRETTY = Cpanel::JSON::XS->new->utf8->canonical->pretty->space_before(0)->indent_length(2);
+
+sub encode_json ($argv) {
+    $JSON->encode($argv);
+}
+
+sub encode_json_pretty ($argv) {
+    $JSON_PRETTY->encode($argv);
+}
+
+sub decode_json ($argv) {
+    $JSON->decode($argv);
+}
+
+sub load_json ($argv) {
+    my $fh;
+    if (ref $argv) {
+        $fh = $argv;
+    } else {
+        open $fh, "<", $argv or die "$!: $argv";
+    }
+    my $c = do { local $/; <$fh> };
+    $JSON->decode($c);
+}
 
 sub dumper (@argv) {
     Data::Dumper
@@ -41,7 +67,11 @@ sub printd (@argv) {
 }
 
 sub printj ($argv) {
-    print $JSON->encode($argv) . "\n";
+    print encode_json($argv) . "\n";
+}
+
+sub printjp ($argv) {
+    print encode_json_pretty($argv);
 }
 
 sub warnd (@argv) {
@@ -49,22 +79,15 @@ sub warnd (@argv) {
 }
 
 sub warnj ($argv) {
-    warn $JSON->encode($argv) . "\n";
+    warn encode_json($argv) . "\n";
 }
 
-sub Cpanel::JSON::XS::load ($self, $argv) {
-    my $fh;
-    if (ref $argv) {
-        $fh = $argv;
-    } else {
-        open $fh, "<", $argv or die "$argv: $!";
-    }
-    my $c = do { local $/; <$fh> };
-    $self->decode($c);
+sub warnjp ($argv) {
+    warn encode_json_pretty($argv);
 }
 
 sub HTTP::Tiny::post_json ($self, $url, $data) {
-    my $content = $JSON->encode($data);
+    my $content = encode_json $data;
     my $res = $self->post($url, {
         headers => {
             'content-type' => 'application/json',
@@ -75,7 +98,7 @@ sub HTTP::Tiny::post_json ($self, $url, $data) {
     if (!$res->{success}) {
         die "$res->{status} $res->{reason}, $url\n";
     }
-    $JSON->decode($res->{content});
+    decode_json $res->{content};
 }
 
 sub mono_clock :prototype() {
