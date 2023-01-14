@@ -1,25 +1,55 @@
 {
-  "dynamic_config": 0,
-  "meta-spec": {
-    "version": 2
-  },
-  "name": "X",
-  "prereqs": {
-    "runtime": {
-      "requires": {
-        "perl": "5.36.0",
-        "Cpanel::JSON::XS": "0",
-        "IO::Socket::SSL": "0",
-        "String::CamelSnakeKebab": "0"
+   "abstract" : "blah blah blah",
+   "author" : [
+      "Shoichi Kaji <skaji@cpan.org>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Zilla version 6.029, CPAN::Meta::Converter version 2.150010",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : 2
+   },
+   "name" : "X",
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "Module::Build::Tiny" : "0.034"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Cpanel::JSON::XS" : "0",
+            "IO::Socket::SSL" : "0",
+            "String::CamelSnakeKebab" : "0",
+            "perl" : "v5.36.0"
+         }
       }
-    }
-  },
-  "provides": {
-    "X": {
-      "file": "lib/X.pm",
-      "version": "1"
-    }
-  },
-  "version": "1",
-  "x_static_install": 1
+   },
+   "provides" : {
+      "X" : {
+         "file" : "lib/X.pm",
+         "version" : "0.001"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/skaji/perl-X/issues"
+      },
+      "homepage" : "https://github.com/skaji/perl-X",
+      "repository" : {
+         "type" : "git",
+         "url" : "https://github.com/skaji/perl-X.git",
+         "web" : "https://github.com/skaji/perl-X"
+      }
+   },
+   "version" : "0.001",
+   "x_generated_by_perl" : "v5.36.0",
+   "x_serialization_backend" : "Cpanel::JSON::XS version 4.32",
+   "x_spdx_expression" : "Artistic-1.0-Perl OR GPL-1.0-or-later",
+   "x_static_install" : 1
 }
+

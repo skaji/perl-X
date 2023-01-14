@@ -1,4 +1,4 @@
-package X;
+package X 0.001;
 use v5.36;
 use experimental qw(builtin defer for_list try);
 
@@ -9,14 +9,14 @@ use IO::Socket::SSL;
 use Time::HiRes ();
 use String::CamelSnakeKebab ();
 
-use Exporter 'import';
+use Exporter qw(import);
 
 our @EXPORT = qw(
     $HTTP
     encode_json encode_json_pretty decode_json load_json
     dumper
     printd printj printjp warnd warnj warnjp
-    mono_clock
+    steady_time
     camel_case snake_case const_case
 );
 
@@ -101,7 +101,7 @@ sub HTTP::Tiny::post_json ($self, $url, $data) {
     decode_json $res->{content};
 }
 
-sub mono_clock :prototype() {
+sub steady_time :prototype() {
     Time::HiRes::clock_gettime(Time::HiRes::CLOCK_MONOTONIC());
 }
 

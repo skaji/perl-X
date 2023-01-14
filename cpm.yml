@@ -1,0 +1,7 @@
+prereqs:
+  runtime:
+    requires:
+      perl: { version: 'v5.36' }
+      Cpanel::JSON::XS:
+      IO::Socket::SSL:
+      String::CamelSnakeKebab:
