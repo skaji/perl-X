@@ -112,7 +112,7 @@ sub steady_time :prototype() {
 
 # my $time = mktime year => 2017, month => 2, day => 1;
 sub mktime (%argv) {
-    Time::Local::timelocal(
+    Time::Local::timelocal_posix(
         ($argv{second} || 0),
         ($argv{minute} || 0),
         ($argv{hour}   || 0),
