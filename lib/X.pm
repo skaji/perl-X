@@ -4,10 +4,14 @@ use experimental qw(builtin defer for_list try);
 
 use Cpanel::JSON::XS ();
 use Data::Dumper ();
+use HTTP::Date ();
 use HTTP::Tiny;
-use IO::Socket::SSL;
-use Time::HiRes ();
+use IO::Socket::SSL ();
+use POSIX ();
 use String::CamelSnakeKebab ();
+use Time::HiRes ();
+use Time::Local ();
+use Time::Piece ();
 
 use Exporter qw(import);
 
@@ -16,8 +20,9 @@ our @EXPORT = qw(
     encode_json encode_json_pretty decode_json load_json
     dumper
     printd printj printjp warnd warnj warnjp
-    steady_time
     camel_case snake_case const_case
+
+    steady_time strftime strptime str2time time2str mktime
 );
 
 our $HTTP = HTTP::Tiny->new(verify_SSL => 1);
@@ -105,6 +110,31 @@ sub steady_time :prototype() {
     Time::HiRes::clock_gettime(Time::HiRes::CLOCK_MONOTONIC());
 }
 
+# my $time = mktime year => 2017, month => 2, day => 1;
+sub mktime (%argv) {
+    Time::Local::timelocal(
+        ($argv{second} || 0),
+        ($argv{minute} || 0),
+        ($argv{hour}   || 0),
+        ($argv{day}    || die),
+        ($argv{month}  || die) - 1,
+        ($argv{year}   || die) - 1900,
+    );
+}
+
+# my $t = strptime("2018-01-01", "%Y-%m-%d");
+sub strptime ($string, $format) {
+    state $tzoffset = Time::Piece->localtime->tzoffset->seconds;
+
+    die "cannot parse %z/%Z correctly" if $format =~ /%[zZ]/;
+    my $gmtime = Time::Piece->strptime($string, $format);
+    $gmtime->epoch - $tzoffset;
+}
+
+sub time2str ($time) {
+    POSIX::strftime("%F %T", localtime $time);
+}
+
 sub camel_case ($str) {
     if ($str =~ /^[A-Z]/) {
         return String::CamelSnakeKebab::upper_camel_case $str;
@@ -116,6 +146,8 @@ sub camel_case ($str) {
     no warnings 'once';
     *snake_case = \&String::CamelSnakeKebab::lower_snake_case;
     *const_case = \&String::CamelSnakeKebab::constant_case;
+    *str2time = \&HTTP::Date::str2time;
+    *strftime = \&POSIX::strftime;
 }
 
 1;

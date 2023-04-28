@@ -3,5 +3,6 @@ prereqs:
     requires:
       perl: { version: 'v5.36' }
       Cpanel::JSON::XS:
+      HTTP::Date:
       IO::Socket::SSL:
       String::CamelSnakeKebab:
