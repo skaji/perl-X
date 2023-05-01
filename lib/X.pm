@@ -12,6 +12,7 @@ use String::CamelSnakeKebab ();
 use Time::HiRes ();
 use Time::Local ();
 use Time::Piece ();
+use Time::Seconds ();
 
 use Exporter qw(import);
 
@@ -23,6 +24,7 @@ our @EXPORT = qw(
     camel_case snake_case const_case
 
     steady_time strftime strptime str2time time2str mktime
+    ONE_DAY
 );
 
 our $HTTP = HTTP::Tiny->new(verify_SSL => 1);
@@ -148,6 +150,7 @@ sub camel_case ($str) {
     *const_case = \&String::CamelSnakeKebab::constant_case;
     *str2time = \&HTTP::Date::str2time;
     *strftime = \&POSIX::strftime;
+    *ONE_DAY = \&Time::Seconds::ONE_DAY;
 }
 
 1;
