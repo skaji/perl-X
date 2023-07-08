@@ -1,6 +1,6 @@
 package X 0.001;
-use v5.36;
-use experimental qw(builtin defer for_list try);
+use v5.38;
+use experimental qw(builtin defer for_list try class);
 
 use Cpanel::JSON::XS ();
 use Data::Dumper ();
@@ -152,5 +152,3 @@ sub camel_case ($str) {
     *strftime = \&POSIX::strftime;
     *ONE_DAY = \&Time::Seconds::ONE_DAY;
 }
-
-1;
