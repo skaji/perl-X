@@ -126,6 +126,10 @@ sub mktime (%argv) {
 
 # my $t = strptime("2018-01-01", "%Y-%m-%d");
 sub strptime ($string, $format) {
+    if ($string =~ /%/) {
+        require Carp;
+        Carp::croak("the first argument of strptime('$string', '$format') must not be FORMAT");
+    }
     state $tzoffset = Time::Piece->localtime->tzoffset->seconds;
 
     die "cannot parse %z/%Z correctly" if $format =~ /%[zZ]/;
