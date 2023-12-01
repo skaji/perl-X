@@ -147,3 +147,11 @@ sub camel_case ($str) {
     *strftime = \&POSIX::strftime;
     *ONE_DAY = \&Time::Seconds::ONE_DAY;
 }
+
+sub HTTP::Tiny::post_json ($self, $url, $argv) {
+    $argv->{content} = encode_json $argv->{content};
+    $argv->{headers} ||= {};
+    $argv->{headers}{'Content-Type'} = 'application/json';
+    $argv->{headers}{'Content-Length'} = length $argv->{content};
+    $self->post($url, $argv);
+}
