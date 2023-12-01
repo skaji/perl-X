@@ -13,6 +13,7 @@ use Time::HiRes ();
 use Time::Local ();
 use Time::Piece ();
 use Time::Seconds ();
+use URI ();
 
 use Exporter qw(import);
 
@@ -21,6 +22,7 @@ our @EXPORT = qw(
     encode_json encode_json_pretty decode_json load_json
     dumper
     printd printj printjp warnd warnj warnjp
+    query_form
     camel_case snake_case const_case
 
     steady_time strftime strptime str2time time2str mktime
@@ -93,19 +95,8 @@ sub warnjp ($argv) {
     warn encode_json_pretty($argv);
 }
 
-sub HTTP::Tiny::post_json ($self, $url, $data) {
-    my $content = encode_json $data;
-    my $res = $self->post($url, {
-        headers => {
-            'content-type' => 'application/json',
-            'content-length' => length $content,
-        },
-        content => $content,
-    });
-    if (!$res->{success}) {
-        die "$res->{status} $res->{reason}, $url\n";
-    }
-    decode_json $res->{content};
+sub query_form ($url) {
+    +{ URI->new($url)->query_form };
 }
 
 sub steady_time :prototype() {

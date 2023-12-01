@@ -6,3 +6,4 @@ prereqs:
       HTTP::Date:
       IO::Socket::SSL:
       String::CamelSnakeKebab:
+      URI:
