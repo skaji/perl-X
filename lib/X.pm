@@ -14,11 +14,9 @@ use Time::Local ();
 use Time::Piece ();
 use Time::Seconds ();
 use URI ();
-
-use Exporter qw(import);
+use builtin ();
 
 our @EXPORT = qw(
-    $HTTP
     encode_json encode_json_pretty decode_json load_json
     dumper
     printd printj printjp warnd warnj warnjp
@@ -27,6 +25,16 @@ our @EXPORT = qw(
 
     steady_time strftime strptime str2time time2str mktime
     ONE_DAY
+
+    true false is_bool
+    weaken unweaken is_weak
+    blessed refaddr reftype
+    created_as_string created_as_number
+    ceil floor
+    indexed
+    trim
+    is_tainted
+    export_lexically
 );
 
 our $HTTP = HTTP::Tiny->new(verify_SSL => 1);
@@ -139,6 +147,14 @@ sub camel_case ($str) {
     return String::CamelSnakeKebab::lower_camel_case $str;
 }
 
+sub HTTP::Tiny::post_json ($self, $url, $argv) {
+    $argv->{content} = encode_json $argv->{content};
+    $argv->{headers} ||= {};
+    $argv->{headers}{'Content-Type'} = 'application/json';
+    $argv->{headers}{'Content-Length'} = length $argv->{content};
+    $self->post($url, $argv);
+}
+
 {
     no warnings 'once';
     *snake_case = \&String::CamelSnakeKebab::lower_snake_case;
@@ -146,12 +162,31 @@ sub camel_case ($str) {
     *str2time = \&HTTP::Date::str2time;
     *strftime = \&POSIX::strftime;
     *ONE_DAY = \&Time::Seconds::ONE_DAY;
+
+    *true = \&builtin::true;
+    *false = \&builtin::false;
+    *is_bool = \&builtin::is_bool;
+    *weaken = \&builtin::weaken;
+    *unweaken = \&builtin::unweaken;
+    *is_weak = \&builtin::is_weak;
+    *blessed = \&builtin::blessed;
+    *refaddr = \&builtin::refaddr;
+    *reftype = \&builtin::reftype;
+    *created_as_string = \&builtin::created_as_string;
+    *created_as_number = \&builtin::created_as_number;
+    *ceil = \&builtin::ceil;
+    *floor = \&builtin::floor;
+    *indexed = \&builtin::indexed;
+    *trim = \&builtin::trim;
+    *is_tainted = \&builtin::is_tainted;
+    *export_lexically = \&builtin::export_lexically;
 }
 
-sub HTTP::Tiny::post_json ($self, $url, $argv) {
-    $argv->{content} = encode_json $argv->{content};
-    $argv->{headers} ||= {};
-    $argv->{headers}{'Content-Type'} = 'application/json';
-    $argv->{headers}{'Content-Length'} = length $argv->{content};
-    $self->post($url, $argv);
+sub import ($class, @name) {
+    experimental->import(qw(builtin defer for_list try class));
+    builtin::export_lexically '$HTTP', \$HTTP;
+    for my $export (@EXPORT) {
+        no strict 'refs';
+        builtin::export_lexically $export, \&{$export};
+    }
 }
