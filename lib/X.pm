@@ -16,8 +16,7 @@ use Time::Seconds ();
 use URI ();
 use builtin ();
 
-my %EXPORT;
-BEGIN {
+my %EXPORT; BEGIN {
     sub MODIFY_CODE_ATTRIBUTES ($, $code, @attr) {
         return @attr if $attr[0] ne 'EXPORT';
         $EXPORT{builtin::refaddr $code} = builtin::true;
@@ -46,7 +45,7 @@ sub decode_json :EXPORT ($argv) {
     $JSON->decode($argv);
 }
 
-sub load_json :EXPORT ($argv) {
+sub load_json :EXPORT ($argv = \*STDIN) {
     my $fh;
     if (ref $argv) {
         $fh = $argv;
@@ -152,40 +151,38 @@ sub str2time :EXPORT { goto \&HTTP::Date::str2time }
 sub strftime :EXPORT { goto \&POSIX::strftime }
 sub ONE_DAY :EXPORT { goto \&Time::Seconds::ONE_DAY }
 
-sub true :EXPORT { goto \&builtin::true }
-sub false :EXPORT { goto \&builtin::false }
-sub is_bool :EXPORT { goto \&builtin::is_bool }
-sub weaken :EXPORT { goto \&builtin::weaken }
-sub unweaken :EXPORT { goto \&builtin::unweaken }
-sub is_weak :EXPORT { goto \&builtin::is_weak }
-sub blessed :EXPORT { goto \&builtin::blessed }
-sub refaddr :EXPORT { goto \&builtin::refaddr }
-sub reftype :EXPORT { goto \&builtin::reftype }
-sub created_as_string :EXPORT { goto \&builtin::created_as_string }
-sub created_as_number :EXPORT { goto \&builtin::created_as_number }
-sub ceil :EXPORT { goto \&builtin::ceil }
-sub floor :EXPORT { goto \&builtin::floor }
-sub indexed :EXPORT { goto \&builtin::indexed }
-sub trim :EXPORT { goto \&builtin::trim }
-sub is_tainted :EXPORT { goto \&builtin::is_tainted }
-sub export_lexically :EXPORT { goto \&builtin::export_lexically }
-
 sub import ($class) {
     my $caller = caller;
 
-    experimental->import(qw(builtin defer for_list try class));
-    no strict 'refs';
-    for my ($name, $v) (%{ $class . "::" }) {
+    my $export = sub ($name, $v) {
+        $name = '$' . $name if ref($v) ne 'CODE';
+        builtin::export_lexically $name, $v;
+    };
+    # my $export = sub ($name, $ref) {
+    #     no strict 'refs';
+    #     *{ $caller . "::$name" } = $ref;
+    # };
+
+    for my ($name, $v) (do { no strict 'refs'; %{ $class . "::" }}) {
         next if ref(\$v) ne 'GLOB';
         if (my $code = *{$v}{CODE}) {
             if ($EXPORT{builtin::refaddr $code}) {
-                 *{ $caller . "::$name" } = $code;
+                $export->($name, $code);
             }
         }
         if (my $scalar = *{$v}{SCALAR}) {
             if ($EXPORT{builtin::refaddr $scalar}) {
-                *{ $caller . "::$name" } = $scalar;
+                $export->($name, $scalar);
             }
         }
     }
+    for my ($name, $v) (%{ builtin:: }) {
+        next if ref(\$v) ne 'GLOB';
+        next if $name =~ /^(BEGIN|VERSION)$/n;
+        if (my $code = *{$v}{CODE}) {
+            $export->($name, $code);
+        }
+    }
+
+    experimental->import(qw(builtin defer for_list try class));
 }
