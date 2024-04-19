@@ -16,45 +16,37 @@ use Time::Seconds ();
 use URI ();
 use builtin ();
 
-our @EXPORT = qw(
-    encode_json encode_json_pretty decode_json load_json
-    dumper
-    printd printj printjp warnd warnj warnjp
-    query_form
-    camel_case snake_case const_case
+my %EXPORT;
+BEGIN {
+    sub MODIFY_CODE_ATTRIBUTES ($, $code, @attr) {
+        return @attr if $attr[0] ne 'EXPORT';
+        $EXPORT{builtin::refaddr $code} = builtin::true;
+        return;
+    }
+    sub MODIFY_SCALAR_ATTRIBUTES ($, $scalar, @attr) {
+        return @attr if $attr[0] ne 'EXPORT';
+        $EXPORT{builtin::refaddr $scalar} = builtin::true;
+        return;
+    }
+}
 
-    steady_time strftime strptime str2time time2str mktime
-    ONE_DAY
+our $HTTP :EXPORT = HTTP::Tiny->new(verify_SSL => 1);
+our $JSON :EXPORT = Cpanel::JSON::XS->new->utf8->canonical;
+our $JSON_PRETTY :EXPORT = Cpanel::JSON::XS->new->utf8->canonical->pretty->space_before(0)->indent_length(2);
 
-    true false is_bool
-    weaken unweaken is_weak
-    blessed refaddr reftype
-    created_as_string created_as_number
-    ceil floor
-    indexed
-    trim
-    is_tainted
-    export_lexically
-);
-
-our $HTTP = HTTP::Tiny->new(verify_SSL => 1);
-
-my $JSON = Cpanel::JSON::XS->new->utf8->canonical;
-my $JSON_PRETTY = Cpanel::JSON::XS->new->utf8->canonical->pretty->space_before(0)->indent_length(2);
-
-sub encode_json ($argv) {
+sub encode_json :EXPORT ($argv) {
     $JSON->encode($argv);
 }
 
-sub encode_json_pretty ($argv) {
+sub encode_json_pretty :EXPORT ($argv) {
     $JSON_PRETTY->encode($argv);
 }
 
-sub decode_json ($argv) {
+sub decode_json :EXPORT ($argv) {
     $JSON->decode($argv);
 }
 
-sub load_json ($argv) {
+sub load_json :EXPORT ($argv) {
     my $fh;
     if (ref $argv) {
         $fh = $argv;
@@ -65,7 +57,7 @@ sub load_json ($argv) {
     $JSON->decode($c);
 }
 
-sub dumper (@argv) {
+sub dumper :EXPORT (@argv) {
     Data::Dumper
         ->new([])
         ->Trailingcomma(1)
@@ -79,40 +71,40 @@ sub dumper (@argv) {
         ->Dump;
 }
 
-sub printd (@argv) {
+sub printd :EXPORT (@argv) {
     print dumper @argv;
 }
 
-sub printj ($argv) {
+sub printj :EXPORT ($argv) {
     print encode_json($argv) . "\n";
 }
 
-sub printjp ($argv) {
+sub printjp :EXPORT ($argv) {
     print encode_json_pretty($argv);
 }
 
-sub warnd (@argv) {
+sub warnd :EXPORT (@argv) {
     warn dumper @argv;
 }
 
-sub warnj ($argv) {
+sub warnj :EXPORT ($argv) {
     warn encode_json($argv) . "\n";
 }
 
-sub warnjp ($argv) {
+sub warnjp :EXPORT ($argv) {
     warn encode_json_pretty($argv);
 }
 
-sub query_form ($url) {
+sub query_form :EXPORT ($url) {
     +{ URI->new($url)->query_form };
 }
 
-sub steady_time :prototype() {
+sub steady_time :EXPORT :prototype() () {
     Time::HiRes::clock_gettime(Time::HiRes::CLOCK_MONOTONIC());
 }
 
 # my $time = mktime year => 2017, month => 2, day => 1;
-sub mktime (%argv) {
+sub mktime :EXPORT (%argv) {
     Time::Local::timelocal_posix(
         ($argv{second} || 0),
         ($argv{minute} || 0),
@@ -124,7 +116,7 @@ sub mktime (%argv) {
 }
 
 # my $t = strptime("2018-01-01", "%Y-%m-%d");
-sub strptime ($string, $format) {
+sub strptime :EXPORT ($string, $format) {
     if ($string =~ /%/) {
         require Carp;
         Carp::croak("the first argument of strptime('$string', '$format') must not be FORMAT");
@@ -136,11 +128,11 @@ sub strptime ($string, $format) {
     $gmtime->epoch - $tzoffset;
 }
 
-sub time2str ($time) {
+sub time2str :EXPORT ($time) {
     POSIX::strftime("%F %T", localtime $time);
 }
 
-sub camel_case ($str) {
+sub camel_case :EXPORT ($str) {
     if ($str =~ /^[A-Z]/) {
         return String::CamelSnakeKebab::upper_camel_case $str;
     }
@@ -155,38 +147,45 @@ sub HTTP::Tiny::post_json ($self, $url, $argv) {
     $self->post($url, $argv);
 }
 
-{
-    no warnings 'once';
-    *snake_case = \&String::CamelSnakeKebab::lower_snake_case;
-    *const_case = \&String::CamelSnakeKebab::constant_case;
-    *str2time = \&HTTP::Date::str2time;
-    *strftime = \&POSIX::strftime;
-    *ONE_DAY = \&Time::Seconds::ONE_DAY;
+sub snake_case :EXPORT { goto \&String::CamelSnakeKebab::lower_snake_case }
+sub str2time :EXPORT { goto \&HTTP::Date::str2time }
+sub strftime :EXPORT { goto \&POSIX::strftime }
+sub ONE_DAY :EXPORT { goto \&Time::Seconds::ONE_DAY }
 
-    *true = \&builtin::true;
-    *false = \&builtin::false;
-    *is_bool = \&builtin::is_bool;
-    *weaken = \&builtin::weaken;
-    *unweaken = \&builtin::unweaken;
-    *is_weak = \&builtin::is_weak;
-    *blessed = \&builtin::blessed;
-    *refaddr = \&builtin::refaddr;
-    *reftype = \&builtin::reftype;
-    *created_as_string = \&builtin::created_as_string;
-    *created_as_number = \&builtin::created_as_number;
-    *ceil = \&builtin::ceil;
-    *floor = \&builtin::floor;
-    *indexed = \&builtin::indexed;
-    *trim = \&builtin::trim;
-    *is_tainted = \&builtin::is_tainted;
-    *export_lexically = \&builtin::export_lexically;
-}
+sub true :EXPORT { goto \&builtin::true }
+sub false :EXPORT { goto \&builtin::false }
+sub is_bool :EXPORT { goto \&builtin::is_bool }
+sub weaken :EXPORT { goto \&builtin::weaken }
+sub unweaken :EXPORT { goto \&builtin::unweaken }
+sub is_weak :EXPORT { goto \&builtin::is_weak }
+sub blessed :EXPORT { goto \&builtin::blessed }
+sub refaddr :EXPORT { goto \&builtin::refaddr }
+sub reftype :EXPORT { goto \&builtin::reftype }
+sub created_as_string :EXPORT { goto \&builtin::created_as_string }
+sub created_as_number :EXPORT { goto \&builtin::created_as_number }
+sub ceil :EXPORT { goto \&builtin::ceil }
+sub floor :EXPORT { goto \&builtin::floor }
+sub indexed :EXPORT { goto \&builtin::indexed }
+sub trim :EXPORT { goto \&builtin::trim }
+sub is_tainted :EXPORT { goto \&builtin::is_tainted }
+sub export_lexically :EXPORT { goto \&builtin::export_lexically }
 
-sub import ($class, @name) {
+sub import ($class) {
+    my $caller = caller;
+
     experimental->import(qw(builtin defer for_list try class));
-    builtin::export_lexically '$HTTP', \$HTTP;
-    for my $export (@EXPORT) {
-        no strict 'refs';
-        builtin::export_lexically $export, \&{$export};
+    no strict 'refs';
+    for my ($name, $v) (%{ $class . "::" }) {
+        next if ref(\$v) ne 'GLOB';
+        if (my $code = *{$v}{CODE}) {
+            if ($EXPORT{builtin::refaddr $code}) {
+                 *{ $caller . "::$name" } = $code;
+            }
+        }
+        if (my $scalar = *{$v}{SCALAR}) {
+            if ($EXPORT{builtin::refaddr $scalar}) {
+                *{ $caller . "::$name" } = $scalar;
+            }
+        }
     }
 }
