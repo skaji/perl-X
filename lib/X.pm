@@ -152,12 +152,7 @@ sub strftime :EXPORT { goto \&POSIX::strftime }
 sub ONE_DAY :EXPORT { goto \&Time::Seconds::ONE_DAY }
 
 sub import ($class) {
-    my $caller = caller;
-
-    my $export = sub ($name, $v) {
-        $name = '$' . $name if ref($v) ne 'CODE';
-        builtin::export_lexically $name, $v;
-    };
+    # my $caller = caller;
     # my $export = sub ($name, $ref) {
     #     no strict 'refs';
     #     *{ $caller . "::$name" } = $ref;
@@ -167,22 +162,21 @@ sub import ($class) {
         next if ref(\$v) ne 'GLOB';
         if (my $code = *{$v}{CODE}) {
             if ($EXPORT{builtin::refaddr $code}) {
-                $export->($name, $code);
+                builtin::export_lexically $name, $code;
             }
         }
         if (my $scalar = *{$v}{SCALAR}) {
             if ($EXPORT{builtin::refaddr $scalar}) {
-                $export->($name, $scalar);
+                builtin::export_lexically '$' . $name, $scalar;
             }
         }
     }
+    my @builtin;
     for my ($name, $v) (%{ builtin:: }) {
         next if ref(\$v) ne 'GLOB';
-        next if $name =~ /^(BEGIN|VERSION)$/n;
-        if (my $code = *{$v}{CODE}) {
-            $export->($name, $code);
-        }
+        next if $name =~ /^(BEGIN|VERSION|import)$/n;
+        push @builtin, $name;
     }
-
+    builtin->import(@builtin);
     experimental->import(qw(builtin defer for_list try class));
 }
