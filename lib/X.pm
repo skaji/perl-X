@@ -2,6 +2,8 @@ package X 0.001;
 use v5.38;
 use experimental qw(builtin defer for_list try class);
 
+use attributes::EXPORT;
+
 use Cpanel::JSON::XS ();
 use Data::Dumper ();
 use HTTP::Date ();
@@ -15,19 +17,6 @@ use Time::Piece ();
 use Time::Seconds ();
 use URI ();
 use builtin ();
-
-my %EXPORT; BEGIN {
-    sub MODIFY_CODE_ATTRIBUTES ($, $code, @attr) {
-        return @attr if $attr[0] ne 'EXPORT';
-        $EXPORT{builtin::refaddr $code} = builtin::true;
-        return;
-    }
-    sub MODIFY_SCALAR_ATTRIBUTES ($, $scalar, @attr) {
-        return @attr if $attr[0] ne 'EXPORT';
-        $EXPORT{builtin::refaddr $scalar} = builtin::true;
-        return;
-    }
-}
 
 our $HTTP :EXPORT = HTTP::Tiny->new(verify_SSL => 1);
 our $JSON :EXPORT = Cpanel::JSON::XS->new->utf8->canonical;
@@ -152,25 +141,7 @@ sub strftime :EXPORT { goto \&POSIX::strftime }
 sub ONE_DAY :EXPORT { goto \&Time::Seconds::ONE_DAY }
 
 sub import ($class) {
-    # my $caller = caller;
-    # my $export = sub ($name, $ref) {
-    #     no strict 'refs';
-    #     *{ $caller . "::$name" } = $ref;
-    # };
-
-    for my ($name, $v) (do { no strict 'refs'; %{ $class . "::" }}) {
-        next if ref(\$v) ne 'GLOB';
-        if (my $code = *{$v}{CODE}) {
-            if ($EXPORT{builtin::refaddr $code}) {
-                builtin::export_lexically $name, $code;
-            }
-        }
-        if (my $scalar = *{$v}{SCALAR}) {
-            if ($EXPORT{builtin::refaddr $scalar}) {
-                builtin::export_lexically '$' . $name, $scalar;
-            }
-        }
-    }
+    builtin::export_lexically( attributes::EXPORT->get_symbols($class)->%* );
     my @builtin;
     for my ($name, $v) (%{ builtin:: }) {
         next if ref(\$v) ne 'GLOB';
