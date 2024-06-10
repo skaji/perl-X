@@ -12,7 +12,7 @@
         "IO::Socket::SSL": "0",
         "String::CamelSnakeKebab": "0",
         "URI": "0",
-        "perl": "v5.38.0"
+        "perl": "v5.40.0"
       }
     }
   },

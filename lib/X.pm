@@ -1,6 +1,6 @@
 package X 0.001;
-use v5.38;
-use experimental qw(builtin defer for_list try class);
+use v5.40;
+use experimental qw(defer class);
 
 use attributes::EXPORT;
 
@@ -149,5 +149,4 @@ sub import ($class) {
         push @builtin, $name;
     }
     builtin->import(@builtin);
-    experimental->import(qw(builtin defer for_list try class));
 }
