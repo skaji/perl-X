@@ -1,6 +1,6 @@
 package X 0.001;
 use v5.40;
-use experimental qw(defer class);
+use experimental qw(builtin class defer);
 
 use attributes::EXPORT;
 
@@ -142,11 +142,4 @@ sub ONE_DAY :EXPORT { goto \&Time::Seconds::ONE_DAY }
 
 sub import ($class) {
     builtin::export_lexically( attributes::EXPORT->get_symbols($class)->%* );
-    my @builtin;
-    for my ($name, $v) (%{ builtin:: }) {
-        next if ref(\$v) ne 'GLOB';
-        next if $name =~ /^(BEGIN|VERSION|import)$/n;
-        push @builtin, $name;
-    }
-    builtin->import(@builtin);
 }

@@ -1,6 +1,6 @@
 package attributes::EXPORT;
-use v5.38;
-use experimental qw(builtin class defer for_list try);
+use v5.40;
+use experimental qw(builtin class defer);
 
 my %export;
 my $modify_attributes = sub ($, $v, @attr) {
@@ -8,7 +8,7 @@ my $modify_attributes = sub ($, $v, @attr) {
     if (@attr == @attr2) {
         return @attr;
     }
-    $export{builtin::refaddr $v} = builtin::true;
+    $export{refaddr $v} = true;
     return @attr2;
 };
 
@@ -24,12 +24,12 @@ sub get_symbols ($, $package) {
     for my ($name, $v) (do { no strict 'refs'; %{ $package . "::" } }) {
         next if ref(\$v) ne 'GLOB';
         if (my $code = *{$v}{CODE}) {
-            if ($export{builtin::refaddr $code}) {
+            if ($export{refaddr $code}) {
                 $symbol{ $name } = $code;
             }
         }
         if (my $scalar = *{$v}{SCALAR}) {
-            if ($export{builtin::refaddr $scalar}) {
+            if ($export{refaddr $scalar}) {
                 $symbol{ '$' . $name } = $scalar;
             }
         }
