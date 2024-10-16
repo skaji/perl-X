@@ -16,7 +16,6 @@ use Time::Local ();
 use Time::Piece ();
 use Time::Seconds ();
 use URI ();
-use builtin ();
 
 our $HTTP :EXPORT = HTTP::Tiny->new(verify_SSL => 1);
 our $JSON :EXPORT = Cpanel::JSON::XS->new->utf8->canonical;
@@ -34,7 +33,7 @@ sub decode_json :EXPORT ($argv) {
     $JSON->decode($argv);
 }
 
-sub load_json :EXPORT ($argv = \*STDIN) {
+sub load_json :EXPORT ($argv) {
     my $fh;
     if (ref $argv) {
         $fh = $argv;
@@ -127,19 +126,15 @@ sub camel_case :EXPORT ($str) {
     return String::CamelSnakeKebab::lower_camel_case $str;
 }
 
+sub snake_case :EXPORT { goto \&String::CamelSnakeKebab::lower_snake_case }
+sub str2time :EXPORT { goto \&HTTP::Date::str2time }
+sub strftime :EXPORT { goto \&POSIX::strftime }
+sub ONE_DAY :EXPORT { goto \&Time::Seconds::ONE_DAY }
+
 sub HTTP::Tiny::post_json ($self, $url, $argv) {
     $argv->{content} = encode_json $argv->{content};
     $argv->{headers} ||= {};
     $argv->{headers}{'Content-Type'} = 'application/json';
     $argv->{headers}{'Content-Length'} = length $argv->{content};
     $self->post($url, $argv);
-}
-
-sub snake_case :EXPORT { goto \&String::CamelSnakeKebab::lower_snake_case }
-sub str2time :EXPORT { goto \&HTTP::Date::str2time }
-sub strftime :EXPORT { goto \&POSIX::strftime }
-sub ONE_DAY :EXPORT { goto \&Time::Seconds::ONE_DAY }
-
-sub import ($class) {
-    builtin::export_lexically( attributes::EXPORT->get_symbols($class)->%* );
 }

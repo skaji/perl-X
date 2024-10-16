@@ -5,32 +5,30 @@ use experimental qw(builtin class defer);
 use meta;
 no warnings 'meta::experimental';
 
-my %export;
+sub import ($class) {
+    my $caller = meta::get_package(scalar caller);
 
-sub import ($) {
-    my sub modify_attributes ($, $v, @attr) {
+    my %export;
+    my sub modify_attributes ($class, $ref, @attr) {
         my @attr2 = grep { $_ ne 'EXPORT' } @attr;
         if (@attr == @attr2) {
             return @attr;
         }
-        $export{refaddr $v} = true;
-        return @attr2;
+        $export{refaddr $ref} = true;
+        @attr2;
     }
-
-    my $caller = caller;
-    my $meta = meta::get_package($caller);
-    $meta->add_symbol('&MODIFY_CODE_ATTRIBUTES' => \&modify_attributes);
-    $meta->add_symbol('&MODIFY_SCALAR_ATTRIBUTES' => \&modify_attributes);
-}
-
-sub get_symbols ($, $package) {
-    my $meta = meta::get_package($package);
-    my %symbol;
-    for my ($name, $symbol) ($meta->list_symbols) {
-        my $ref = $symbol->reference;
-        if ($export{refaddr $ref}) {
-            $symbol{$name} = $ref;
+    my sub import ($class) {
+        my %symbol;
+        for my ($name, $symbol) ($caller->list_symbols) {
+            my $ref = $symbol->reference;
+            if ($export{refaddr $ref}) {
+                $symbol{$name} = $ref;
+            }
         }
+        builtin::export_lexically %symbol if %symbol;
     }
-    \%symbol;
+
+    $caller->add_symbol('&MODIFY_CODE_ATTRIBUTES', \&modify_attributes);
+    $caller->add_symbol('&MODIFY_SCALAR_ATTRIBUTES', \&modify_attributes);
+    $caller->add_symbol('&import', \&import);
 }
