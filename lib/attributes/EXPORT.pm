@@ -18,14 +18,13 @@ sub import ($class) {
         @attr2;
     }
     my sub import ($class) {
-        my %symbol;
+        my $kaller = meta::get_package(scalar caller);
         for my ($name, $symbol) ($caller->list_symbols) {
             my $ref = $symbol->reference;
             if ($export{refaddr $ref}) {
-                $symbol{$name} = $ref;
+                $kaller->add_symbol($name, $ref);
             }
         }
-        builtin::export_lexically %symbol if %symbol;
     }
 
     $caller->add_symbol('&MODIFY_CODE_ATTRIBUTES', \&modify_attributes);
