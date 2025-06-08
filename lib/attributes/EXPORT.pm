@@ -22,7 +22,12 @@ sub import ($class) {
         for my ($name, $symbol) ($caller->list_symbols) {
             my $ref = $symbol->reference;
             if ($export{refaddr $ref}) {
-                $kaller->add_symbol($name, $ref);
+                if ($name =~ s/^\$//) {
+                    no strict 'refs';
+                    *{ $kaller->name . "::$name" } = $ref;
+                } else {
+                    $kaller->add_symbol($name, $ref);
+                }
             }
         }
     }
