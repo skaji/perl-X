@@ -19,7 +19,8 @@ sub import ($class) {
     }
     my sub import ($class) {
         my $kaller = meta::get_package(scalar caller);
-        for my ($name, $symbol) ($caller->list_symbols) {
+        my %symbol = $caller->list_symbols;
+        for my ($name, $symbol) (%symbol) {
             my $ref = $symbol->reference;
             if ($export{refaddr $ref}) {
                 if ($name =~ s/^\$//) {
