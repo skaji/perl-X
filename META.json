@@ -12,11 +12,11 @@
         "IO::Socket::SSL": "0",
         "String::CamelSnakeKebab": "0",
         "URI": "0",
-        "meta": "0.012",
-        "perl": "v5.40.0"
+        "meta": "0.013",
+        "perl": "v5.42.0"
       }
     }
   },
-  "version": "1",
+  "version": "v1.0.0",
   "x_static_install": 1
 }

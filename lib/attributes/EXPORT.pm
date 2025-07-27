@@ -1,6 +1,6 @@
 package attributes::EXPORT;
-use v5.40;
-use experimental qw(builtin class defer);
+use v5.42;
+use experimental qw(builtin defer keyword_all keyword_any);
 
 use meta;
 no warnings 'meta::experimental';
@@ -21,6 +21,9 @@ sub import ($class) {
         my $kaller = meta::get_package(scalar caller);
         my %symbol = $caller->list_symbols;
         for my ($name, $symbol) (%symbol) {
+            if ($kaller->try_get_symbol($name)) {
+                next;
+            }
             my $ref = $symbol->reference;
             if ($export{refaddr $ref}) {
                 if ($name =~ s/^\$//) {

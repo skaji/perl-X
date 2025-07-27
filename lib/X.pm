@@ -1,6 +1,6 @@
-package X 0.001;
-use v5.40;
-use experimental qw(builtin class defer);
+package X v1.0.0;
+use v5.42;
+use experimental qw(builtin defer keyword_all keyword_any);
 
 use attributes::EXPORT;
 
@@ -131,10 +131,11 @@ sub str2time :EXPORT { goto \&HTTP::Date::str2time }
 sub strftime :EXPORT { goto \&POSIX::strftime }
 sub ONE_DAY :EXPORT { goto \&Time::Seconds::ONE_DAY }
 
-sub HTTP::Tiny::post_json ($self, $url, $argv) {
-    $argv->{content} = encode_json $argv->{content};
-    $argv->{headers} ||= {};
-    $argv->{headers}{'Content-Type'} = 'application/json';
-    $argv->{headers}{'Content-Length'} = length $argv->{content};
-    $self->post($url, $argv);
+sub HTTP::Tiny::post_json ($self, $url, $argv_) {
+    my %argv = $argv_->%*;
+    my %header = $argv_->{headers} ? $argv_->{headers}->%* : ();
+    $argv{content} = encode_json $argv_->{content};
+    $header{'Content-Type'} = 'application/json';
+    $header{'Content-Length'} = length $argv{content};
+    $self->post($url, { %argv, headers => \%header });
 }
